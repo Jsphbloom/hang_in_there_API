@@ -1,4 +1,5 @@
 class Api::V1::PostersController < ApplicationController
+
   def index
     render json: PosterSerializer.format_posters(Poster.all)
   end
@@ -16,6 +17,13 @@ class Api::V1::PostersController < ApplicationController
     render json: Poster.delete(params[:id])
   end
   
+  def show
+    render json: PosterSerializer.format_single_poster(Poster.find(params[:id]))
+  end
+
+  def update
+    render json: Poster.update(params[:id], poster_params)
+  end
   
   private
   
@@ -25,5 +33,10 @@ class Api::V1::PostersController < ApplicationController
     #Joe did it this way and it worked as well:
     # params.require(:data).require(:attributes).permit(:name, :description, :img_url, :price, :year, :vintage)
     # params.permit(:name, :description, :img_url, :price, :year, :vintage)
+  end
+  
+  def poster_params
+    params.require(:data).require(:attributes).permit(:name, :description, :price, :year, :vintage, :img_url)
+
   end
 end
