@@ -16,7 +16,10 @@ class PosterSerializer
       }
     end
 
-    return { data: poster_data }
+    return { 
+      data: poster_data,
+      meta: {count: poster_data.count}
+    }
   end
 
   def self.format_single_poster(poster)
