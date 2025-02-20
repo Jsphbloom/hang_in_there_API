@@ -63,9 +63,9 @@ describe "hang_in_there_API", type: :request do
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
     expect(poster_data.count).to eq(1)
-    # expect(poster_data[:data].count).to eq(1)
-    # expect(poster_data[:id]).to be_a(Integer)
-    # expect(poster_data).to have_key(:type)
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data]).to have_key(:type)
+    expect(poster_data[:data][:id]).to be_a(Integer)
     # expect(poster_data[:type]).to be_a(String)
     # expect(poster_data[:data]).to have_key(:attributes)
     # expect(poster_data[:attributes]).to be_a(Hash)
