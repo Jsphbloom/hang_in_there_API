@@ -84,19 +84,27 @@ describe "hang_in_there_API", type: :request do
   end
 
   it 'can update a poster' do
-    id = Poster.create(
+    ogposter = Poster.create!(
     name: "TEST",
     description: "This is a test..",
     price: 10.00,
     year: 2,
     vintage: false,
     img_url:  "nil"
-    ).id
+    )
+    id = ogposter.id
     previous_name = Poster.last.name
-    updated_poster_params = { name: "TEST II", description: "This is another test." }
+    updated_poster_params = { 
+      data: {
+        attributes: {
+        name: "TEST II",
+        description: "This is another test." 
+        }
+      }
+    }
     headers = {"CONTENT_TYPE" => "application/json"}
-    # binding.pry
-    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate({poster: updated_poster_params})
+
+    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate(updated_poster_params)
     poster = Poster.find_by(id: id)
     expect(response).to be_successful
     expect(poster.name).to_not eq(previous_name)
