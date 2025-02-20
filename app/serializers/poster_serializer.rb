@@ -19,8 +19,22 @@ class PosterSerializer
     return { data: poster_data }
   end
 
-  def self.format_created_poster()
-    
+  def self.format_created_poster(poster)
+    #Should refactor this later (lots of repeated w/ above format_posters())
+    return {
+      data: {
+        id: poster.id,
+        type: "poster",
+        attributes: {
+          name: poster.name,
+          description: poster.description,
+          price: poster.price,
+          year: poster.year,
+          vintage: poster.vintage,
+          img_url: poster.img_url
+        }
+      }
+    }
   end
 
 end
