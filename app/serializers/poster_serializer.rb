@@ -21,17 +21,17 @@ class PosterSerializer
 
   def self.format_single_poster(poster)
     poster_data = {
-        id: poster.id,
-        type: "poster",
-        attributes: {
-          name: poster.name,
-          description: poster.description,
-          price: poster.price,
-          year: poster.year,
-          vintage: poster.vintage,
-          img_url: poster.img_url
-        }
+      id: poster.id,
+      type: "poster",
+      attributes: {
+      name: poster.name,
+      description: poster.description,
+      price: poster.price,
+      year: poster.year,
+      vintage: poster.vintage,
+      img_url: poster.img_url
       }
-      return { data: poster_data }
+    }
+    return { data: poster_data }
   end
 end

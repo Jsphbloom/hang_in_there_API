@@ -52,7 +52,54 @@ describe "hang_in_there_API", type: :request do
       expect(poster[:attributes]).to have_key(:img_url)
       expect(poster[:attributes][:img_url]).to be_a(String)
     end
+  end
+
+  it "creates a new poster and returns appropriate response" do
+    incoming_valid_parameters = {
+      "name": "DEFEAT",
+      "description": "It's too late to start now.",
+      "price": 35.00,
+      "year": 2023,
+      "vintage": false,
+      "img_url":  "https://unsplash.com/photos/brown-brick-building-with-red-car-parked-on-the-side-mMV6Y0ExyIk"
+    }
+    headers = { "CONTENT_TYPE" => "application/json" }
+
+    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+
+    #Check for database being updated correctly.  Anything additional?
+    #Query DB:
+    newest_poster = Poster.last
+    newest_poster = Poster.order(created_at: :desc).limit(1)[0]
+
+    expect(response).to be_successful
+    #Also check the actual response (code + content)
+    expect(newest_poster.name).to eq(incoming_valid_parameters[:name])
+    expect(newest_poster.description).to eq(incoming_valid_parameters[:description])
+    expect(newest_poster.price).to eq(incoming_valid_parameters[:price])
+    expect(newest_poster.year).to eq(incoming_valid_parameters[:year])
+    expect(newest_poster.vintage).to eq(incoming_valid_parameters[:vintage])
+    expect(newest_poster.img_url).to eq(incoming_valid_parameters[:img_url])
+
+    #Later: also test invalid API data?
+
+  end
+
+  it "deletes a specified poster from the database" do
+    #Create a temporary poster just for verifying deletion later
+    temp_poster = Poster.create(name: "APATHY", description: "I wouldn't be so apathetic if I weren't so lethargic")
+
     
+    expect(Poster.count).to eq(4)   #Added one record on top of the three sample posters.  Might try the 'change.by' later...
+    
+    delete "/api/v1/posters/#{temp_poster.id}"
+    
+    expect(response).to be_successful
+    expect(Poster.count).to eq(3)
+    expect{ (Poster.find(temp_poster.id)) }.to raise_error(ActiveRecord::RecordNotFound)      #WHY does this need {}'s to run correctly?  Because of how errors are evaluated?
+
+    #Later: could try to delete one of the earlier added ones too to verify it was removed, and also try to delete an nonexistent poster
+
   end
 
   it 'can fetch a single poster' do
