@@ -6,7 +6,7 @@ class Api::V1::PostersController < ApplicationController
 
   def create
     created_poster = Poster.create(poster_params())
-    render json: PosterSerializer.format_created_poster(created_poster)
+    render json: PosterSerializer.format_single_poster(created_poster)
     #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'
   end
 
@@ -35,8 +35,8 @@ class Api::V1::PostersController < ApplicationController
     # params.permit(:name, :description, :img_url, :price, :year, :vintage)
   end
   
-  def poster_params
-    params.require(:data).require(:attributes).permit(:name, :description, :price, :year, :vintage, :img_url)
+  # def poster_params
+  #   params.require(:data).require(:attributes).permit(:name, :description, :price, :year, :vintage, :img_url)
 
-  end
+  # end
 end
