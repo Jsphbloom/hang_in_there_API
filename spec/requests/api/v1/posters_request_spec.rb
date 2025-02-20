@@ -70,9 +70,7 @@ describe "hang_in_there_API", type: :request do
     #Check for database being updated correctly.  Anything additional?
     #Query DB:
     newest_poster = Poster.last
-    # newest_poster = Poster.order(created_at: :desc)[0]
-
-    # binding.pry
+    newest_poster = Poster.order(created_at: :desc).limit(1)[0]
 
     expect(response).to be_successful
     #Also check the actual response (code + content)
@@ -96,8 +94,6 @@ describe "hang_in_there_API", type: :request do
     
     delete "/api/v1/posters/#{temp_poster.id}"
     
-    # binding.pry
-
     expect(response).to be_successful
     expect(Poster.count).to eq(3)
     expect{ (Poster.find(temp_poster.id)) }.to raise_error(ActiveRecord::RecordNotFound)      #WHY does this need {}'s to run correctly?  Because of how errors are evaluated?
