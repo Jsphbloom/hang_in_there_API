@@ -19,4 +19,8 @@ class PosterSerializer
     return { data: poster_data }
   end
 
+  def self.format_created_poster()
+    
+  end
+
 end
