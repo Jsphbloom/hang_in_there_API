@@ -72,7 +72,7 @@ describe "hang_in_there_API", type: :request do
     newest_poster = Poster.last
     # newest_poster = Poster.order(created_at: :desc)[0]
 
-    binding.pry
+    # binding.pry
 
     expect(response).to be_successful
     #Also check the actual response (code + content)
@@ -84,6 +84,25 @@ describe "hang_in_there_API", type: :request do
     expect(newest_poster.img_url).to eq(incoming_valid_parameters[:img_url])
 
     #Later: also test invalid API data?
+
+  end
+
+  it "deletes a specified poster from the database" do
+    #Create a temporary poster just for verifying deletion later
+    temp_poster = Poster.create(name: "APATHY", description: "I wouldn't be so apathetic if I weren't so lethargic")
+
+    
+    expect(Poster.count).to eq(4)   #Added one record on top of the three sample posters.  Might try the 'change.by' later...
+    
+    delete "/api/v1/posters/#{temp_poster.id}"
+    
+    # binding.pry
+
+    expect(response).to be_successful
+    expect(Poster.count).to eq(3)
+    expect{ (Poster.find(temp_poster.id)) }.to raise_error(ActiveRecord::RecordNotFound)      #WHY does this need {}'s to run correctly?  Because of how errors are evaluated?
+
+    #Later: could try to delete one of the earlier added ones too to verify it was removed, and also try to delete an nonexistent poster
 
   end
 

@@ -41,6 +41,15 @@ class Api::V1::PostersController < ApplicationController
 
     
   end
+
+  def destroy()
+    #Just 204 status needs to be returned, no additional content
+    # binding.pry
+    
+    # render json: Poster.delete(params[:id], poster_params())
+    #Apparently poster_params() cannot be run with delete()?  Perhaps because the route forces it to only send one parameter (so we're automatically safe)?
+    render json: Poster.delete(params[:id])
+  end
   
   
   private
