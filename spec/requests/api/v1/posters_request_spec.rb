@@ -64,9 +64,9 @@ describe "hang_in_there_API", type: :request do
 
     expect(poster_data.count).to eq(1)
     # expect(poster_data[:data].count).to eq(1)
-    # # expect(poster_data[:id]).to be_a(Integer)
-    # # expect(poster_data).to have_key(:type)
-    # # expect(poster_data[:type]).to be_a(String)
+    # expect(poster_data[:id]).to be_a(Integer)
+    # expect(poster_data).to have_key(:type)
+    # expect(poster_data[:type]).to be_a(String)
     # expect(poster_data[:data]).to have_key(:attributes)
     # expect(poster_data[:attributes]).to be_a(Hash)
     # expect(poster_data[:attributes]).to have_key(:name)
