@@ -15,4 +15,5 @@ Rails.application.routes.draw do
   get "/api/v1/posters/:id", to: "api/v1/posters#show"
   patch "api/v1/posters/:id", to: "api/v1/posters#update"
 
+  
 end
