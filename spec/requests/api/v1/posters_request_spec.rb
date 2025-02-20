@@ -83,4 +83,25 @@ describe "hang_in_there_API", type: :request do
     expect(poster_data[:data].first[:attributes][:img_url]).to be_a(String)
   end
 
+  it 'can update a poster' do
+    id = Poster.create(
+    name: "TEST",
+    description: "This is a test..",
+    price: 10.00,
+    year: 2,
+    vintage: false,
+    img_url:  "nil"
+    ).id
+    previous_name = Poster.last.name
+    updated_poster_params = { name: "TEST II", description: "This is another test." }
+    headers = {"CONTENT_TYPE" => "application/json"}
+    # binding.pry
+    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate({poster: updated_poster_params})
+    poster = Poster.find_by(id: id)
+    expect(response).to be_successful
+    expect(poster.name).to_not eq(previous_name)
+    expect(poster.name).to eq("TEST II")
+    
+  end
+
 end
