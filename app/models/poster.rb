@@ -1,11 +1,11 @@
 class Poster < ApplicationRecord
 
   def self.sort_by_asc
-    Poster.all.order(price: :asc)
+    Poster.all.order(created_at: :asc)
   end
 
   def self.sort_by_desc
-    Poster.all.order(price: :desc)
+    Poster.all.order(created_at: :desc)
   end
 
   def self.filter_by_name(filter_text)
