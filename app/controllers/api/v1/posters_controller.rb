@@ -7,17 +7,31 @@ class Api::V1::PostersController < ApplicationController
     elsif params[:sort] == "asc"
       all_posters = Poster.sort_by_asc
     end
-    render json: PosterSerializer.format_posters(all_posters)
+
+    if params[:name]
+      #Go to method to process filtering, needs argument(s) as well
+      relevant_posters = Poster.filter_by_name(params[:name])
+    end
+  
+    #Note: will not return records with a missing / nil price (# of records being returned in database was throwing me off at first!)
+    if params[:min_price]
+      relevant_posters = Poster.filter_by_price(params[:min_price], :min)
+    elsif params[:max_price]
+      relevant_posters = Poster.filter_by_price(params[:max_price], :max)
+    end
+
+    # render json: PosterSerializer.format_posters(all_posters)
+    render json: PosterSerializer.format_posters(relevant_posters)
   end
 
-  def create
+  def create()
     created_poster = Poster.create(poster_params())
     render json: PosterSerializer.format_single_poster(created_poster)
-    #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'
+    #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'?
   end
 
   def destroy()
-    #Just 204 status needs to be returned, no additional content.  Right now returning code 200.  May need adjusting.
+    #Returns code 200 by default, though instructions mentioned 204.  Checked with instructor - 200 code is fine.
     # render json: Poster.delete(params[:id], poster_params())
     #Apparently poster_params() cannot be run with delete()?  Perhaps because the route forces it to only send one parameter (so we're automatically safe)?
     render json: Poster.delete(params[:id])
@@ -41,8 +55,4 @@ class Api::V1::PostersController < ApplicationController
     # params.permit(:name, :description, :img_url, :price, :year, :vintage)
   end
   
-  # def poster_params
-  #   params.require(:data).require(:attributes).permit(:name, :description, :price, :year, :vintage, :img_url)
-
-  # end
 end
