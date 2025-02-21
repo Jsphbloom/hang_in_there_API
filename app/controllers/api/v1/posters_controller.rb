@@ -1,7 +1,13 @@
 class Api::V1::PostersController < ApplicationController
 
   def index
-    render json: PosterSerializer.format_posters(Poster.all)
+    all_posters = Poster.all
+    if params[:sort] == "desc"
+      all_posters = Poster.sort_by_desc
+    elsif params[:sort] == "asc"
+      all_posters = Poster.sort_by_asc
+    end
+    render json: PosterSerializer.format_posters(all_posters)
   end
 
   def create
