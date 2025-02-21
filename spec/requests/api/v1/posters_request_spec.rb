@@ -4,22 +4,24 @@ SimpleCov.start
 
 describe "hang_in_there_API", type: :request do
   before(:all) do
-    
-    Poster.create(name: "REGRET",
+    Poster.create(
+    name: "REGRET",
     description: "Hard work rarely pays off.",
     price: 89.00,
     year: 2018,
     vintage: true,
     img_url:  "https://plus.unsplash.com/premium_photo-1661293818249-fddbddf07a5d")
 
-    Poster.create(name: "WOE",
+    Poster.create(
+    name: "WOE",
     description: "Life is an endless toil.",
     price: 20.00,
     year: 2016,
     vintage: true,
     img_url:  "https://plus.unsplash.com/premium_photo-1661293818249-fddbddf07a5d")
 
-    Poster.create(name: "MISERY",
+    Poster.create(
+    name: "MISERY",
     description: "Why me God?",
     price: 9.00,
     year: 2008,
@@ -237,7 +239,7 @@ describe "hang_in_there_API", type: :request do
     expect(poster_data[:data][3][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
   end
 
-  xit 'can sort updated posters' do
+  it 'can sort updated posters' do
 
     get "/api/v1/posters?sort=asc"
     expect(response).to be_successful
