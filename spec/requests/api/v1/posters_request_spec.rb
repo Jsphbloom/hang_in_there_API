@@ -30,7 +30,7 @@ describe "hang_in_there_API", type: :request do
     expect(response).to be_successful
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
-    expect(poster_data.count).to eq(1)
+    expect(poster_data.count).to eq(2)
     expect(poster_data[:data].count).to eq(3)
     poster_data[:data].each do |poster|
       expect(poster).to have_key(:id)
@@ -109,7 +109,7 @@ describe "hang_in_there_API", type: :request do
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
-    expect(poster_data.count).to eq(1)
+    expect(poster_data.count).to eq(2)
     expect(poster_data[:data].count).to eq(3)
     expect(poster_data[:data].first).to have_key(:type)
     expect(poster_data[:data].first[:id]).to be_a(Integer)
@@ -156,4 +156,109 @@ describe "hang_in_there_API", type: :request do
     
   end
 
+  it 'can adjust results using query parameters' do
+
+    get "/api/v1/posters?sort=asc"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data.count).to eq(2)
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][1][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
+    expect(poster_data[:data][1][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
+
+    get "/api/v1/posters?sort=desc"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data.count).to eq(2)
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][1][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
+    expect(poster_data[:data][1][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
+  end
+
+  it 'can sort created posters' do
+    incoming_valid_parameters = {
+      "name": "CHEAPEST",
+      "description": "Should be the first element.",
+      "price": 1.00,
+      "year": 2023,
+      "vintage": false,
+      "img_url":  "https://unsplash.com/photos/brown-brick-building-with-red-car-parked-on-the-side-mMV6Y0ExyIk"
+    }
+    headers = { "CONTENT_TYPE" => "application/json" }
+
+    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+    expect(response).to be_successful
+
+    incoming_valid_parameters = {
+      "name": "PRICIEST",
+      "description": "It's too late to start now.",
+      "price": 20000.00,
+      "year": 2023,
+      "vintage": false,
+      "img_url":  "https://unsplash.com/photos/brown-brick-building-with-red-car-parked-on-the-side-mMV6Y0ExyIk"
+    }
+    headers = { "CONTENT_TYPE" => "application/json" }
+
+    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+    expect(response).to be_successful
+
+    get "/api/v1/posters?sort=asc"
+    expect(response).to be_successful
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][1][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+
+    expect(poster_data[:data][1][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][2][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][3][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+
+    get "/api/v1/posters?sort=desc"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][1][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+
+    expect(poster_data[:data][1][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][2][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][3][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+  end
+
+  it 'can sort updated posters' do
+
+    get "/api/v1/posters?sort=asc"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data.count).to eq(2)
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:price]).to eq(9.0)
+
+    updated_poster_params = { 
+      description: "updated cheapest price",
+      price: 0.01,
+      id: 3
+    }
+    headers = {"CONTENT_TYPE" => "application/json"}
+# binding.pry
+    patch "/api/v1/posters/1", headers: headers, params: JSON.generate(poster: updated_poster_params)
+    #why is this not updating the poster?
+    expect(response).to be_successful
+    get "/api/v1/posters?sort=asc"
+    expect(response).to be_successful
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+# binding.pry
+    expect(poster_data[:data][0][:attributes][:price]).to eq(0.01)
+  end
 end
