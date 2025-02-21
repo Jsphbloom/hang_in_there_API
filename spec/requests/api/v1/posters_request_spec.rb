@@ -3,8 +3,8 @@ require "simplecov"
 SimpleCov.start
 
 describe "hang_in_there_API", type: :request do
-  before(:all) do
-    Poster.create(
+  before(:each) do
+    @poster1 = Poster.create(
     name: "REGRET",
     description: "Hard work rarely pays off.",
     price: 89.00,
@@ -12,7 +12,7 @@ describe "hang_in_there_API", type: :request do
     vintage: true,
     img_url:  "https://plus.unsplash.com/premium_photo-1661293818249-fddbddf07a5d")
 
-    Poster.create(
+    @poster2 = Poster.create(
     name: "WOE",
     description: "Life is an endless toil.",
     price: 20.00,
@@ -20,7 +20,7 @@ describe "hang_in_there_API", type: :request do
     vintage: true,
     img_url:  "https://plus.unsplash.com/premium_photo-1661293818249-fddbddf07a5d")
 
-    Poster.create(
+    @poster3 = Poster.create(
     name: "MISERY",
     description: "Why me God?",
     price: 9.00,
@@ -108,7 +108,7 @@ describe "hang_in_there_API", type: :request do
   end
 
   it 'can fetch a single poster' do
-    get "/api/v1/posters/1"
+    get "/api/v1/posters/#{@poster1.id}"
 
     expect(response).to be_successful
 
@@ -257,7 +257,7 @@ describe "hang_in_there_API", type: :request do
     }
     headers = {"CONTENT_TYPE" => "application/json"}
 # binding.pry
-    patch "/api/v1/posters/1", headers: headers, params: JSON.generate(poster: updated_poster_params)
+    patch "/api/v1/posters/#{@poster1.id}", headers: headers, params: JSON.generate(poster: updated_poster_params)
     #why is this not updating the poster?
     expect(response).to be_successful
     get "/api/v1/posters?sort=asc"
