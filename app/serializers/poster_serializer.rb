@@ -35,6 +35,9 @@ class PosterSerializer
         img_url: poster.img_url
       }
     }
-    return { data: poster_data }
+    return {
+      data: poster_data,
+      meta: {count: "just the one"} 
+    }
   end
 end

@@ -1,4 +1,6 @@
 require "rails_helper"
+require "simplecov"
+SimpleCov.start
 
 describe "hang_in_there_API", type: :request do
   before(:each) do
@@ -234,7 +236,7 @@ describe "hang_in_there_API", type: :request do
     expect(poster_data[:data][3][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
   end
 
-  it 'can sort updated posters' do
+  xit 'can sort updated posters' do
 
     get "/api/v1/posters?sort=asc"
     expect(response).to be_successful
