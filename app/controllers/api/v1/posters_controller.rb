@@ -47,9 +47,9 @@ class Api::V1::PostersController < ApplicationController
   end
   
   def show
+    #Includes iteration 4 update:
     found_poster = Poster.find_by(id: params[:id])
     if !found_poster
-      #Manually set the status (we do it this way multiple times; is there a better way?)
       response.status = 404
       render json: PosterSerializer.return_error()
     else
@@ -81,7 +81,6 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def check_attributes_present()
-    #Verify all params present; if any are not, return array of symbols for processing in serializer
     required_attributes = [:name, :description, :price, :year, :vintage, :img_url]
 
     required_attributes.find_all do |attribute|
@@ -90,7 +89,6 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def check_attributes_valid()
-    #Verify that no required param is blank / zero; if any fail, return them as an array for processing in serializer
     attributes_to_check = [:name, :description, :price, :year, :img_url]
 
     attributes_to_check.find_all do |attribute|

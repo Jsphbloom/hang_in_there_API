@@ -9,7 +9,6 @@ class Poster < ApplicationRecord
   end
 
   def self.filter_by_name(filter_text)
-    #Find all records with name containing the string filter_text - and ensure case insensitivity
     filtered_posters = Poster.where("LOWER(name) LIKE '%#{filter_text.downcase}%'")
   
     filtered_posters.order(name: :asc)
@@ -24,7 +23,6 @@ class Poster < ApplicationRecord
   end
 
   def self.verify_unique(incoming_params)
-    #Verify name is unique (could be modified to check other params later)
     if Poster.where(name: incoming_params[:name]) == []
       return true
     else
