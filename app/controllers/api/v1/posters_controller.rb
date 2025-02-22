@@ -1,6 +1,8 @@
 class Api::V1::PostersController < ApplicationController
 
   def index
+    relevant_posters = Poster.all
+    
     #Query: sorting posters by 'created_at'
     if params[:sort] == "desc"
       relevant_posters = Poster.sort_by_desc
