@@ -36,7 +36,14 @@ class Api::V1::PostersController < ApplicationController
   end
   
   def show
-      render json: PosterSerializer.format_single_poster(Poster.find(params[:id]))
+    found_poster = Poster.find_by(id: params[:id])
+    if !found_poster
+      #Manually set the status (is there a better way?)
+      response.status = 404
+      render json: PosterSerializer.return_error()              #NOTE: do we have to adjust any tests for this?
+    else
+      render json: PosterSerializer.format_single_poster(found_poster)
+    end
   end
 
   def update

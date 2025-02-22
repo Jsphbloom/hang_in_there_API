@@ -39,4 +39,16 @@ class PosterSerializer
       meta: {count: "just the one"}       #Need to change this.  ALSO: should this only show up for later iteration items?  That would be pretty arbitrary...
     }
   end
+
+  def self.return_error()
+    {
+      "errors": [
+        {
+          "status": "404",
+          "message": "Record not found"
+        }
+      ]
+    }
+  end
+  
 end
