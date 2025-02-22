@@ -25,8 +25,18 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def create()
-    created_poster = Poster.create(poster_params())
-    render json: PosterSerializer.format_single_poster(created_poster)
+     #Iteration 4 update:
+     missing_attributes = check_attributes_present()
+
+    #  binding.pry
+
+     if missing_attributes != []
+       response.status = 422
+       render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
+     else
+       render json: PosterSerializer.format_single_poster(Poster.create(poster_params()))
+     end
+
     #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'?
   end
 
@@ -47,13 +57,34 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def update
-    render json: Poster.update(params[:id], poster_params)
+    # #Iteration 4 update:
+    # missing_attributes = check_attributes_present()
+
+    # # binding.pry
+
+    # if missing_attributes != []
+    #   response.status = 422
+    #   render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
+
+    # else
+    #   # Poster.update(params[:id], poster_params)
+      render json: Poster.update(params[:id], poster_params)
+    # end
   end
   
   private
   
   def poster_params()
     params.require(:poster).permit(:name, :description, :img_url, :price, :year, :vintage)
+  end
+
+  def check_attributes_present()
+    #Verify all params present; if any are not, return array of symbols for processing in serializer
+    required_attributes = [:name, :description, :price, :year, :vintage, :img_url]
+
+    required_attributes.find_all do |attribute|
+      params[attribute] == nil
+    end
   end
   
 end

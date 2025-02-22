@@ -50,5 +50,24 @@ class PosterSerializer
       ]
     }
   end
-  
+
+  def self.return_missing_attrs_error(missing_attrs)
+    # message_text = ""
+    final_message = missing_attrs.reduce("") do |message_text, attribute|
+      message_text += "#{attribute.to_s.capitalize} and "
+    end.delete_suffix(" and ")
+    # final_message.delete_suffix(" and ")
+
+    # binding.pry
+
+    {
+      "errors": [
+        {
+          "status": "422",
+          "message": "#{final_message} cannot be blank."
+        }
+      ]
+    }
+  end
+
 end
