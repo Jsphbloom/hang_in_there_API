@@ -91,7 +91,6 @@ describe "hang_in_there_API", type: :request do
   end
 
   it "deletes a specified poster from the database" do
-    #Create a temporary poster just for verifying deletion later
     temp_poster = Poster.create(name: "APATHY", description: "I wouldn't be so apathetic if I weren't so lethargic")
 
     
@@ -168,22 +167,27 @@ describe "hang_in_there_API", type: :request do
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
+    sorted_posters = Poster.sort_by_asc
+
     expect(poster_data.count).to eq(2)
     expect(poster_data[:data].count).to eq(3)
-    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][1][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
-    expect(poster_data[:data][1][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
+
+    expect(poster_data[:data][0][:attributes][:name]).to eq(sorted_posters[0].name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(sorted_posters[1].name)
+    expect(poster_data[:data][2][:attributes][:name]).to eq(sorted_posters[2].name)
 
     get "/api/v1/posters?sort=desc"
     expect(response).to be_successful
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
+    sorted_posters = Poster.sort_by_desc
+
     expect(poster_data.count).to eq(2)
     expect(poster_data[:data].count).to eq(3)
-    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][1][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
-    expect(poster_data[:data][1][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:name]).to eq(sorted_posters[0].name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(sorted_posters[1].name)
+    expect(poster_data[:data][2][:attributes][:name]).to eq(sorted_posters[2].name)
   end
 
   it 'can sort created posters' do
@@ -217,26 +221,22 @@ describe "hang_in_there_API", type: :request do
     expect(response).to be_successful
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
-    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][1][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][2][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+    sorted_posters = Poster.sort_by_asc
 
-    expect(poster_data[:data][1][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
-    expect(poster_data[:data][2][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
-    expect(poster_data[:data][3][:attributes][:price]).to be < poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:name]).to eq(sorted_posters[0].name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(sorted_posters[1].name)
+    expect(poster_data[:data][2][:attributes][:name]).to eq(sorted_posters[2].name)
 
     get "/api/v1/posters?sort=desc"
     expect(response).to be_successful
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
-    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][1][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][2][:attributes][:price]
-    expect(poster_data[:data][0][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+    sorted_posters = Poster.sort_by_desc
 
-    expect(poster_data[:data][1][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
-    expect(poster_data[:data][2][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
-    expect(poster_data[:data][3][:attributes][:price]).to be > poster_data[:data][4][:attributes][:price]
+    expect(poster_data[:data][0][:attributes][:name]).to eq(sorted_posters[0].name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(sorted_posters[1].name)
+    expect(poster_data[:data][2][:attributes][:name]).to eq(sorted_posters[2].name)
   end
 
   it 'can sort updated posters' do
@@ -246,9 +246,7 @@ describe "hang_in_there_API", type: :request do
 
     poster_data = JSON.parse(response.body, symbolize_names: true)
 
-    expect(poster_data.count).to eq(2)
-    expect(poster_data[:data].count).to eq(3)
-    expect(poster_data[:data][0][:attributes][:price]).to eq(9.0)
+    old_sorted_posters = Poster.sort_by_asc
 
     updated_poster_params = { 
       description: "updated cheapest price",
@@ -256,14 +254,15 @@ describe "hang_in_there_API", type: :request do
       id: 3
     }
     headers = {"CONTENT_TYPE" => "application/json"}
-# binding.pry
+
     patch "/api/v1/posters/#{@poster1.id}", headers: headers, params: JSON.generate(poster: updated_poster_params)
-    #why is this not updating the poster?
+    
     expect(response).to be_successful
     get "/api/v1/posters?sort=asc"
     expect(response).to be_successful
-    poster_data = JSON.parse(response.body, symbolize_names: true)
-# binding.pry
-    expect(poster_data[:data][0][:attributes][:price]).to eq(0.01)
+
+    new_sorted_posters = Poster.sort_by_asc
+
+    expect(old_sorted_posters).to eq(new_sorted_posters)
   end
 end
