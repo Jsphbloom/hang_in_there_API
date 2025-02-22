@@ -265,4 +265,101 @@ describe "hang_in_there_API", type: :request do
 
     expect(old_sorted_posters).to eq(new_sorted_posters)
   end
+
+  it "can filter results by name, given a provided string" do
+    get "/api/v1/posters?name=e"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:name]).to eq(@poster3.name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(@poster1.name)
+    expect(poster_data[:data][2][:attributes][:name]).to eq(@poster2.name)
+
+    get "/api/v1/posters?name=woe"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(1)
+    expect(poster_data[:data][0][:attributes][:name]).to eq(@poster2.name)
+
+    @poster4 = Poster.create(
+      name: "MISERABLE",
+      description: "Guess why we chose this name?",
+      price: 89.00,
+      year: 2018,
+      vintage: true,
+      img_url:  "https://plus.unsplash.com/premium_photo-1661293818249-fddbddf07a5d")
+
+    get "/api/v1/posters?name=mIsE"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(2)
+    expect(poster_data[:data][0][:attributes][:name]).to eq(@poster4.name)
+    expect(poster_data[:data][1][:attributes][:name]).to eq(@poster3.name)
+  end
+
+  it "filter by minimum price" do
+    get "/api/v1/posters?min_price=15.00"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(2)
+    expect(poster_data[:data][0][:attributes][:price]).to eq(@poster1.price)
+    expect(poster_data[:data][1][:attributes][:price]).to eq(@poster2.price)
+
+    get "/api/v1/posters?min_price=0.00"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:price]).to eq(@poster1.price)
+    expect(poster_data[:data][1][:attributes][:price]).to eq(@poster2.price)
+    expect(poster_data[:data][2][:attributes][:price]).to eq(@poster3.price)
+
+    get "/api/v1/posters?min_price=2000.00"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(0)
+    expect(poster_data[:data]).to eq([])
+    expect(poster_data[:meta][:count]).to eq(0)
+  end
+
+  it "filter by maximum price" do
+    get "/api/v1/posters?max_price=15.00"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(1)
+    expect(poster_data[:data][0][:attributes][:price]).to eq(@poster3.price)
+
+    get "/api/v1/posters?max_price=89.01"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(3)
+    expect(poster_data[:data][0][:attributes][:price]).to eq(@poster1.price)
+    expect(poster_data[:data][1][:attributes][:price]).to eq(@poster2.price)
+    expect(poster_data[:data][2][:attributes][:price]).to eq(@poster3.price)
+
+    get "/api/v1/posters?max_price=0.00"
+    expect(response).to be_successful
+
+    poster_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(poster_data[:data].count).to eq(0)
+    expect(poster_data[:data]).to eq([])
+    expect(poster_data[:meta][:count]).to eq(0)
+  end
+
 end
