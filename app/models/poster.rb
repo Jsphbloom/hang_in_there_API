@@ -22,4 +22,14 @@ class Poster < ApplicationRecord
       Poster.where("price < #{price_threshold}")
     end
   end
+
+  def self.verify_unique(incoming_params)
+    #Verify name is unique (could be modified to check other params later)
+    # Poster.pluck(:name).include?(incoming_params[:name])      #This technically uses Ruby methods, so trying to avoid this...
+    if Poster.where(name: incoming_params[:name]) == []
+      return true
+    else
+      return false
+    end
+  end
 end

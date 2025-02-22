@@ -25,17 +25,27 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def create()
-     #Iteration 4 update:
-     missing_attributes = check_attributes_present()
+    #Iteration 4 update:
+    missing_attributes = check_attributes_present()
 
-    #  binding.pry
+     binding.pry
 
-     if missing_attributes != []
-       response.status = 422
-       render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
-     else
-       render json: PosterSerializer.format_single_poster(Poster.create(poster_params()))
-     end
+    if missing_attributes != []
+      response.status = 422
+      render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
+    else
+      #We still need to verify that the requested new poster's name doesn't already exist (i.e. it's unique)
+      if !Poster.verify_unique(params)
+        response.status = 418
+        render json: { "message": "duplicate yo" }
+      else
+       
+        # binding.pry
+
+        render json: PosterSerializer.format_single_poster(Poster.create(poster_params()))
+      end
+    end
+
 
     #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'?
   end
@@ -68,8 +78,33 @@ class Api::V1::PostersController < ApplicationController
 
     # else
     #   # Poster.update(params[:id], poster_params)
-      render json: Poster.update(params[:id], poster_params)
+
+      # render json: Poster.update(params[:id], poster_params)
+
     # end
+
+
+    invalid_attributes = check_attributes_valid()
+
+    binding.pry
+
+    if invalid_attributes != []
+      response.status = 418
+      render json: { "message": "invalid param yo" }
+    else
+      if !Poster.verify_unique(params)
+
+        binding.pry
+
+        response.status = 418
+        render json: { "message": "attempting to change name to make a duplicate yo" }
+      else
+      
+        # binding.pry
+
+        render json: PosterSerializer.format_single_poster(Poster.update(params[:id], poster_params()))
+      end
+    end
   end
   
   private
@@ -84,6 +119,15 @@ class Api::V1::PostersController < ApplicationController
 
     required_attributes.find_all do |attribute|
       params[attribute] == nil
+    end
+  end
+
+  def check_attributes_valid()
+    #Verify that no required param is blank / zero; if any fail, return them as an array for processing in serializer
+    attributes_to_check = [:name, :description, :price, :year, :img_url]
+
+    attributes_to_check.find_all do |attribute|
+      params[attribute] == "" || params[attribute] == 0
     end
   end
   
