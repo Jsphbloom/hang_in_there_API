@@ -1,21 +1,20 @@
 class Api::V1::PostersController < ApplicationController
 
   def index
+    #Default behavior (no query):
     relevant_posters = Poster.all
     
-    #Query: sorting posters by 'created_at'
+    #Queries:
     if params[:sort] == "desc"
       relevant_posters = Poster.sort_by_desc
     elsif params[:sort] == "asc"
       relevant_posters = Poster.sort_by_asc
     end
 
-    #Query: filtering posters by string within 'name'
     if params[:name]
       relevant_posters = Poster.filter_by_name(params[:name])
     end
   
-    #Query: filtering posters by min / max price threshold
     if params[:min_price]
       relevant_posters = Poster.filter_by_price(params[:min_price], :min)
     elsif params[:max_price]
@@ -32,12 +31,12 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def destroy()
-    #Returns code 200 by default, though instructions mentioned 204.  Checked with instructor - 200 code is fine.
+    #Returns code 200 by default via Rails, though instructions mentioned 204 at one point.  Checked with instructor - 200 code is fine.
     render json: Poster.delete(params[:id])
   end
   
   def show
-    render json: PosterSerializer.format_single_poster(Poster.find(params[:id]))
+      render json: PosterSerializer.format_single_poster(Poster.find(params[:id]))
   end
 
   def update

@@ -36,7 +36,7 @@ class PosterSerializer
     }
     return {
       data: poster_data,
-      meta: {count: "just the one"} 
+      meta: {count: "just the one"}       #Need to change this.  ALSO: should this only show up for later iteration items?  That would be pretty arbitrary...
     }
   end
 end

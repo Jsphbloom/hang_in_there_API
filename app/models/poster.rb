@@ -9,11 +9,10 @@ class Poster < ApplicationRecord
   end
 
   def self.filter_by_name(filter_text)
-    #Find all records with name containing the string filter_text
-    #Make text case-insensitive.  Would use SQL command LOWER(), but doesn't seem to work correctly with where(), so upcase is reasonable for now.
-    filtered_posters = Poster.where("name LIKE '%#{filter_text.upcase}%'")
+    #Find all records with name containing the string filter_text - and ensure case insensitivity
+    filtered_posters = Poster.where("LOWER(name) LIKE '%#{filter_text.downcase}%'")
   
-    filtered_posters.order(name: :asc)
+    filtered_posters.order(name: :asc)      #Could probably refactor to one line
   end
   
   def self.filter_by_price(price_threshold, bound)

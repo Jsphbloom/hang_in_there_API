@@ -87,6 +87,7 @@ describe "hang_in_there_API", type: :request do
     expect(newest_poster.img_url).to eq(incoming_valid_parameters[:img_url])
 
     #Later: also test invalid API data?
+    #YES - IMPLEMENT THIS (should add record, but with no superfluous data)
 
   end
 
