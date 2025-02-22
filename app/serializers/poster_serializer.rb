@@ -36,7 +36,7 @@ class PosterSerializer
     }
     return {
       data: poster_data,
-      meta: {count: "just the one"}       #Need to change this.  ALSO: should this only show up for later iteration items?  That would be pretty arbitrary...
+      meta: { count: poster_data.count }
     }
   end
 
@@ -52,22 +52,44 @@ class PosterSerializer
   end
 
   def self.return_missing_attrs_error(missing_attrs)
-    # message_text = ""
-    final_message = missing_attrs.reduce("") do |message_text, attribute|
-      message_text += "#{attribute.to_s.capitalize} and "
-    end.delete_suffix(" and ")
-    # final_message.delete_suffix(" and ")
-
-    # binding.pry
-
     {
       "errors": [
         {
           "status": "422",
-          "message": "#{final_message} cannot be blank."
+          "message": "#{PosterSerializer.build_error_params_text(missing_attrs)} cannot be blank."
         }
       ]
     }
+  end
+
+  def self.return_invalid_attrs_error(invalid_attrs)
+    {
+      "errors": [
+        {
+          "status": "422",
+          "message": "#{PosterSerializer.build_error_params_text(invalid_attrs)} cannot be an empty string or zero."
+        }
+      ]
+    }
+  end
+
+  def self.return_duplicate_error()
+    {
+      "errors": [
+        {
+          "status": "418",
+          "message": "Attempting to create / update a duplicate entry.  Please use a unique name."
+        }
+      ]
+    }
+  end
+
+  private
+
+  def self.build_error_params_text(attributes)
+    attributes.reduce("") do |message_text, attribute|
+      message_text += "#{attribute.to_s.capitalize} and "
+    end.delete_suffix(" and ")
   end
 
 end

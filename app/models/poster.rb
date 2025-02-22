@@ -12,7 +12,7 @@ class Poster < ApplicationRecord
     #Find all records with name containing the string filter_text - and ensure case insensitivity
     filtered_posters = Poster.where("LOWER(name) LIKE '%#{filter_text.downcase}%'")
   
-    filtered_posters.order(name: :asc)      #Could probably refactor to one line
+    filtered_posters.order(name: :asc)
   end
   
   def self.filter_by_price(price_threshold, bound)
@@ -25,7 +25,6 @@ class Poster < ApplicationRecord
 
   def self.verify_unique(incoming_params)
     #Verify name is unique (could be modified to check other params later)
-    # Poster.pluck(:name).include?(incoming_params[:name])      #This technically uses Ruby methods, so trying to avoid this...
     if Poster.where(name: incoming_params[:name]) == []
       return true
     else

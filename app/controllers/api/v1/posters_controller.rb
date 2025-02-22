@@ -25,29 +25,20 @@ class Api::V1::PostersController < ApplicationController
   end
 
   def create()
-    #Iteration 4 update:
+    #Includes iteration 4 update
     missing_attributes = check_attributes_present()
-
-     binding.pry
 
     if missing_attributes != []
       response.status = 422
       render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
     else
-      #We still need to verify that the requested new poster's name doesn't already exist (i.e. it's unique)
       if !Poster.verify_unique(params)
         response.status = 418
-        render json: { "message": "duplicate yo" }
+        render json: PosterSerializer.return_duplicate_error()
       else
-       
-        # binding.pry
-
         render json: PosterSerializer.format_single_poster(Poster.create(poster_params()))
       end
     end
-
-
-    #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'?
   end
 
   def destroy()
@@ -58,50 +49,26 @@ class Api::V1::PostersController < ApplicationController
   def show
     found_poster = Poster.find_by(id: params[:id])
     if !found_poster
-      #Manually set the status (is there a better way?)
+      #Manually set the status (we do it this way multiple times; is there a better way?)
       response.status = 404
-      render json: PosterSerializer.return_error()              #NOTE: do we have to adjust any tests for this?
+      render json: PosterSerializer.return_error()
     else
       render json: PosterSerializer.format_single_poster(found_poster)
     end
   end
 
   def update
-    # #Iteration 4 update:
-    # missing_attributes = check_attributes_present()
-
-    # # binding.pry
-
-    # if missing_attributes != []
-    #   response.status = 422
-    #   render json: PosterSerializer.return_missing_attrs_error(missing_attributes)
-
-    # else
-    #   # Poster.update(params[:id], poster_params)
-
-      # render json: Poster.update(params[:id], poster_params)
-
-    # end
-
-
+    # #Includes iteration 4 update:
     invalid_attributes = check_attributes_valid()
-
-    binding.pry
 
     if invalid_attributes != []
       response.status = 418
-      render json: { "message": "invalid param yo" }
+      render json: PosterSerializer.return_invalid_attrs_error(invalid_attributes)
     else
       if !Poster.verify_unique(params)
-
-        binding.pry
-
         response.status = 418
-        render json: { "message": "attempting to change name to make a duplicate yo" }
+        render json: PosterSerializer.return_duplicate_error()
       else
-      
-        # binding.pry
-
         render json: PosterSerializer.format_single_poster(Poster.update(params[:id], poster_params()))
       end
     end
