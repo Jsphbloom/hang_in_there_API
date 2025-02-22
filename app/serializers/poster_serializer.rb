@@ -2,7 +2,6 @@ class PosterSerializer
   def self.format_posters(posters)
     poster_data = posters.map do |poster|
       {
-        #id, type, attributes, name, description, year, price, vintage, url
         id: poster.id,
         type: "poster",
         attributes: {

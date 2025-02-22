@@ -1,25 +1,36 @@
 class Api::V1::PostersController < ApplicationController
 
   def index
-    all_posters = Poster.all
+    #Query: sorting posters by 'created_at'
     if params[:sort] == "desc"
-      all_posters = Poster.sort_by_desc
+      relevant_posters = Poster.sort_by_desc
     elsif params[:sort] == "asc"
-      all_posters = Poster.sort_by_asc
+      relevant_posters = Poster.sort_by_asc
     end
-    render json: PosterSerializer.format_posters(all_posters)
+
+    #Query: filtering posters by string within 'name'
+    if params[:name]
+      relevant_posters = Poster.filter_by_name(params[:name])
+    end
+  
+    #Query: filtering posters by min / max price threshold
+    if params[:min_price]
+      relevant_posters = Poster.filter_by_price(params[:min_price], :min)
+    elsif params[:max_price]
+      relevant_posters = Poster.filter_by_price(params[:max_price], :max)
+    end
+
+    render json: PosterSerializer.format_posters(relevant_posters)
   end
 
-  def create
+  def create()
     created_poster = Poster.create(poster_params())
     render json: PosterSerializer.format_single_poster(created_poster)
-    #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'
+    #Could refactor later further probably.  Is this ok to still have in controller, or is it 'too much'?
   end
 
   def destroy()
-    #Just 204 status needs to be returned, no additional content.  Right now returning code 200.  May need adjusting.
-    # render json: Poster.delete(params[:id], poster_params())
-    #Apparently poster_params() cannot be run with delete()?  Perhaps because the route forces it to only send one parameter (so we're automatically safe)?
+    #Returns code 200 by default, though instructions mentioned 204.  Checked with instructor - 200 code is fine.
     render json: Poster.delete(params[:id])
   end
   
@@ -34,15 +45,7 @@ class Api::V1::PostersController < ApplicationController
   private
   
   def poster_params()
-    #For data validation purposes - STILL NEEDS MORE TESTING (will it accept other fields in the request and just ignore them?)
     params.require(:poster).permit(:name, :description, :img_url, :price, :year, :vintage)
-    #Joe did it this way and it worked as well:
-    # params.require(:data).require(:attributes).permit(:name, :description, :img_url, :price, :year, :vintage)
-    # params.permit(:name, :description, :img_url, :price, :year, :vintage)
   end
   
-  # def poster_params
-  #   params.require(:data).require(:attributes).permit(:name, :description, :price, :year, :vintage, :img_url)
-
-  # end
 end
