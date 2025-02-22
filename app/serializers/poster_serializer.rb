@@ -36,7 +36,7 @@ class PosterSerializer
     }
     return {
       data: poster_data,
-      meta: { count: poster_data.count }
+      meta: { count: 1 }
     }
   end
 
