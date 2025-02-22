@@ -53,7 +53,7 @@ describe "hang_in_there_API", type: :request do
       expect(poster[:attributes]).to have_key(:year)
       expect(poster[:attributes][:year]).to be_a(Integer)
       expect(poster[:attributes]).to have_key(:vintage)
-      expect([true, false]).to include(poster[:attributes][:vintage])   #Weird way to write this test...maybe refactor later
+      expect([true, false]).to include(poster[:attributes][:vintage])
       expect(poster[:attributes]).to have_key(:img_url)
       expect(poster[:attributes][:img_url]).to be_a(String)
     end
@@ -70,15 +70,13 @@ describe "hang_in_there_API", type: :request do
     }
     headers = { "CONTENT_TYPE" => "application/json" }
 
-    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+    post "/api/v1/posters", headers: headers, params: JSON.generate(incoming_valid_parameters)
 
-    #Check for database being updated correctly.  Anything additional?
     #Query DB:
     newest_poster = Poster.last
     newest_poster = Poster.order(created_at: :desc).limit(1)[0]
 
     expect(response).to be_successful
-    #Also check the actual response (code + content)
     expect(newest_poster.name).to eq(incoming_valid_parameters[:name])
     expect(newest_poster.description).to eq(incoming_valid_parameters[:description])
     expect(newest_poster.price).to eq(incoming_valid_parameters[:price])
@@ -86,24 +84,31 @@ describe "hang_in_there_API", type: :request do
     expect(newest_poster.vintage).to eq(incoming_valid_parameters[:vintage])
     expect(newest_poster.img_url).to eq(incoming_valid_parameters[:img_url])
 
-    #Later: also test invalid API data?
+    #Iteration 4 - attempt to create duplicate name, and missing attributes:
+    post "/api/v1/posters", headers: headers, params: JSON.generate(incoming_valid_parameters)
+    expect(response).to_not be_successful
 
+    incoming_missing_parameters = {
+      "name": "WRATH",
+      "price": 35.00,
+      "year": 2023,
+      "img_url":  "https://unsplash.com/photos/brown-brick-building-with-red-car-parked-on-the-side-mMV6Y0ExyIk"
+    }
+
+    post "/api/v1/posters", headers: headers, params: JSON.generate(incoming_missing_parameters)
+    expect(response).to_not be_successful
   end
 
   it "deletes a specified poster from the database" do
     temp_poster = Poster.create(name: "APATHY", description: "I wouldn't be so apathetic if I weren't so lethargic")
-
     
-    expect(Poster.count).to eq(4)   #Added one record on top of the three sample posters.  Might try the 'change.by' later...
+    expect(Poster.count).to eq(4)
     
     delete "/api/v1/posters/#{temp_poster.id}"
     
     expect(response).to be_successful
     expect(Poster.count).to eq(3)
-    expect{ (Poster.find(temp_poster.id)) }.to raise_error(ActiveRecord::RecordNotFound)      #WHY does this need {}'s to run correctly?  Because of how errors are evaluated?
-
-    #Later: could try to delete one of the earlier added ones too to verify it was removed, and also try to delete an nonexistent poster
-
+    expect{ (Poster.find(temp_poster.id)) }.to raise_error(ActiveRecord::RecordNotFound)
   end
 
   it 'can fetch a single poster' do
@@ -120,18 +125,10 @@ describe "hang_in_there_API", type: :request do
     expect(poster_data[:data][:type]).to be_a(String)
     expect(poster_data[:data]).to include(:attributes)
     expect(poster_data[:data][:attributes]).to be_a(Hash)
-    expect(poster_data[:data][:attributes]).to have_key(:name)
-    expect(poster_data[:data][:attributes][:name]).to be_a(String)
-    expect(poster_data[:data][:attributes]).to have_key(:description)
-    expect(poster_data[:data][:attributes][:description]).to be_a(String)
-    expect(poster_data[:data][:attributes]).to have_key(:price)
-    expect(poster_data[:data][:attributes][:price]).to be_a(Float)
-    expect(poster_data[:data][:attributes]).to have_key(:year)
-    expect(poster_data[:data][:attributes][:year]).to be_a(Integer)
-    expect(poster_data[:data][:attributes]).to have_key(:vintage)
-    expect([true, false]).to include(poster_data[:data][:attributes][:vintage])   #Weird way to write this test...maybe refactor later
-    expect(poster_data[:data][:attributes]).to have_key(:img_url)
-    expect(poster_data[:data][:attributes][:img_url]).to be_a(String)
+    #No need to re-test all attributes (did this is previous test)
+
+    get "/api/v1/posters/1000"
+    expect(response).to_not be_successful
   end
 
   it 'can update a poster' do
@@ -152,16 +149,25 @@ describe "hang_in_there_API", type: :request do
 
     headers = {"CONTENT_TYPE" => "application/json"}
 
-    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate(poster: updated_poster_params)
+    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate(updated_poster_params)
     poster = Poster.find_by(id: id)
     expect(response).to be_successful
     expect(poster.name).to_not eq(previous_name)
     expect(poster.name).to eq("TEST II")
-    
+
+    #Iteration 4: check duplicate or blank / invalid attributes
+    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate(updated_poster_params)
+    expect(response).to_not be_successful
+
+    blank_poster_params = {
+      description: "",
+    }
+
+    patch "/api/v1/posters/#{id}", headers: headers, params: JSON.generate(blank_poster_params)
+    expect(response).to_not be_successful
   end
 
   it 'can adjust results using query parameters' do
-
     get "/api/v1/posters?sort=asc"
     expect(response).to be_successful
 
@@ -201,7 +207,8 @@ describe "hang_in_there_API", type: :request do
     }
     headers = { "CONTENT_TYPE" => "application/json" }
 
-    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+    post "/api/v1/posters", headers: headers, params: JSON.generate(incoming_valid_parameters)
+
     expect(response).to be_successful
 
     incoming_valid_parameters = {
@@ -214,7 +221,7 @@ describe "hang_in_there_API", type: :request do
     }
     headers = { "CONTENT_TYPE" => "application/json" }
 
-    post "/api/v1/posters", headers: headers, params: JSON.generate(poster: incoming_valid_parameters)
+    post "/api/v1/posters", headers: headers, params: JSON.generate(incoming_valid_parameters)
     expect(response).to be_successful
 
     get "/api/v1/posters?sort=asc"
@@ -240,7 +247,6 @@ describe "hang_in_there_API", type: :request do
   end
 
   it 'can sort updated posters' do
-
     get "/api/v1/posters?sort=asc"
     expect(response).to be_successful
 
